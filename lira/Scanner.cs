@@ -40,7 +40,7 @@ public class Scanner
             case '*': AddToken(TokenKind.STAR); break;
             case '/': AddToken(TokenKind.SLASH); break;
             // TODO: Throw error
-            default: Console.WriteLine($"Unrecognized character [{c}] [line {_line}]"); break;
+            default: break;
         }
     }
 
