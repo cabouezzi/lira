@@ -1,29 +1,31 @@
 using System;
 using System.IO;
 
+namespace Lira;
+
 public class Lira
 {
 
-    public static void Main (String[] args)
+    public static void Main(string[] args)
     {
         Console.WriteLine("Hello World");
         if (args.Length == 1)
         {
-            runFile(args[0]);
+            RunFile(args[0]);
         }
-        else {
+        else
+        {
             Console.WriteLine("Input a file");
         }
     }
 
     // Just prints the file for now
-    public static void runFile (String path)
+    public static void RunFile(string path)
     {
-        byte[] bytes = File.ReadAllBytes(path);
-        foreach (byte symbol in bytes) 
-        {
-            Console.Write("{0}", (char)symbol);
-        }
+        string source = File.ReadAllText(path);
+        Scanner scanner = new(source);
+        List<Token> tokens = scanner.ScanTokens();
+        foreach (Token token in tokens) Console.WriteLine(token);
     }
 
 }
