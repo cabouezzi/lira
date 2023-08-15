@@ -4,10 +4,10 @@ namespace Lira;
 	
 public sealed class Token
 {
-	readonly TokenKind Kind;
-	readonly string Lexeme;
-	readonly object? Literal;
-	readonly int Line;
+	public TokenKind Kind { get; }
+	public string Lexeme { get; }
+	public object? Literal { get; }
+	public int Line { get; }
 
 	public Token(TokenKind type, string lexeme, int line, object? literal = null)
 	{

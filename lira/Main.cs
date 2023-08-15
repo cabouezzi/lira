@@ -8,18 +8,21 @@ public class Lira
 
     public static void Main(string[] args)
     {
-        Console.WriteLine("Hello World");
         if (args.Length == 1)
         {
             RunFile(args[0]);
         }
         else
         {
-            Console.WriteLine("Input a file");
+            Console.WriteLine("""
+            Welcome to Lira habibi!
+            We charge 10% interest in performance for each line of text.
+            ------------------------------------------------------------
+            Usage: lira <file_name>
+            """);
         }
     }
 
-    // Just prints the file for now
     public static void RunFile(string path)
     {
         string source = File.ReadAllText(path);

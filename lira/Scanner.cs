@@ -53,9 +53,9 @@ public class Scanner
 
     #region Character Navigation
 
-    public char Advance() => _source[_current++];
-    public char Peek() => _source[_current];
-    public char PeekNext() => _source[_current++];
+    private char Advance() => _source[_current++];
+    private char Peek() => _source[_current];
+    private char PeekNext() => _source[_current++];
 
     #endregion
 
