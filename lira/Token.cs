@@ -17,5 +17,5 @@ public sealed class Token
 		this.Line = line;
 	}
 
-	override public string ToString() => $"{Kind} {Lexeme} {Literal}";
+	override public string ToString() => $"[{Kind} {Lexeme} {Literal}]";
 }
