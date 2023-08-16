@@ -28,7 +28,7 @@ public class Lira
         string source = File.ReadAllText(path);
         Scanner scanner = new(source);
         List<Token> tokens = scanner.ScanTokens();
-        foreach (Token token in tokens) Console.WriteLine(token);
+        foreach (Token token in tokens) Console.WriteLine($"{token}");
     }
 
 }
