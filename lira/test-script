@@ -2,3 +2,13 @@
 dotnet build --output .lirabuild
 # ./.lirabuild/Lira <–– path to executable
 ./.lirabuild/Lira ExpressionTest.lira
+
+OUTPUT=$(./.lirabuild/Lira ExpressionTest.lira | tail -1)
+EXPECTED="(== (!= (== (group (/ (group (+ 1 2)) (group (* 44.454 6)))) (- 77)) this should not throw an error) nil)"
+
+if [ "$OUTPUT" = "$EXPECTED" ]; then
+    printf "\nTEST PASSED: Script printed expected output."
+else
+    printf "\nTEST FAILED: $OUTPUT."
+    printf "\n\tEXPECTED: $EXPECTED"
+fi
