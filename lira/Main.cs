@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace Lira;
 
 public class Lira
@@ -37,7 +34,7 @@ public class Lira
         Parser parser = new(tokens);
         IExpr? expr = parser.Parse();
 
-        if (expr == null)
+        if (expr is null)
         {
             Console.Write("Parser returned null expression.");
             return;

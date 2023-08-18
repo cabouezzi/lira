@@ -1,5 +1,3 @@
-using System;
-
 namespace Lira;
 
 public partial class Scanner

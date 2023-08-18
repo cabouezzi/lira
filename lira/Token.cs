@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Lira;
+﻿namespace Lira;
 	
 public sealed class Token
 {

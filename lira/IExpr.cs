@@ -1,14 +1,10 @@
-using System;
-using System.Linq.Expressions;
-
 namespace Lira;
 
-// This is an auto-generated file
 public interface IExpr
-{	
+{
 	public interface IVisitor<T>
-	{
-		T VisitUnary(Unary unary);
+    {
+	    T VisitUnary(Unary unary);
 		T VisitBinary(Binary binary);
 		T VisitGrouping(Grouping grouping);
 		T VisitLiteral(Literal literal);

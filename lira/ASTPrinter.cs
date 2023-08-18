@@ -1,12 +1,9 @@
-using System;
 using System.Text;
 
 namespace Lira;
 
-public class ASTPrinter: IExpr.IVisitor<string>
+public class ASTPrinter : IExpr.IVisitor<string>
 {
-
-    public ASTPrinter() {}
 
     public string Print(IExpr expr)
     {
@@ -32,7 +29,7 @@ public class ASTPrinter: IExpr.IVisitor<string>
 
     public string VisitGrouping(IExpr.Grouping grouping) => Parenthesize("group", grouping.Expr);
 
-    public string VisitLiteral(IExpr.Literal literal) => literal.Value == null ? "nil" : $"{literal.Value}";
+    public string VisitLiteral(IExpr.Literal literal) => literal.Value is null ? "nil" : $"{literal.Value}";
 
     public string VisitUnary(IExpr.Unary unary) => Parenthesize(unary.Operator.Lexeme, unary.Right);
     

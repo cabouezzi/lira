@@ -1,11 +1,8 @@
-using System;
-using System.Linq.Expressions;
-
 namespace Lira;
 
 public class Parser
 {
-    public class ParserError: Exception {}
+    public class ParserError : Exception {}
 
     private readonly List<Token> _tokens;
     private int _current = 0;
