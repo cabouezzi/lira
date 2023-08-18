@@ -6,6 +6,9 @@
 # Chaniel uses mac :)
 .DS_Store
 
+# Project build folder
+.lirabuild
+
 # User-specific files
 *.rsuser
 *.suo

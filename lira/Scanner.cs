@@ -143,7 +143,7 @@ public partial class Scanner
         // Consume closing quote
         Advance();
         // Trim the quotes
-        String value = _source.Substring(_start + 1, _current - _start - 1);
+        String value = _source.Substring(_start + 1, _current - _start - 2);
         AddToken(TokenKind.STRING, value);
     }
 

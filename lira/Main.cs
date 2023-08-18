@@ -28,7 +28,31 @@ public class Lira
         string source = File.ReadAllText(path);
         Scanner scanner = new(source);
         List<Token> tokens = scanner.ScanTokens();
-        foreach (Token token in tokens) Console.WriteLine($"{token}");
+        
+        Console.WriteLine("Scanner returned following tokens:");
+        foreach(Token token in tokens) Console.Write($"{token} ");
+
+        Console.WriteLine("\n");
+
+        Parser parser = new(tokens);
+        IExpr? expr = parser.Parse();
+
+        if (expr == null)
+        {
+            Console.Write("Parser returned null expression.");
+            return;
+        }
+        Console.WriteLine(new ASTPrinter().Print(expr));
+    }
+
+    public static void Error(int line, string message)
+    {
+        Report(line, "", message);
+    }
+
+    public static void Report(int line, string context, string message)
+    {
+        Console.WriteLine($"[line {line}] Error {context}: {message}");
     }
 
 }
