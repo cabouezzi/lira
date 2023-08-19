@@ -1,0 +1,5 @@
+// This should be ignored
+/*
+This should also be ignored
+*/
+((1 + 2) / (44.454 * 6 )) == -77 != "this should not throw an error" == nil
