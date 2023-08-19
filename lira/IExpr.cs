@@ -12,7 +12,7 @@ public interface IExpr
 
 	public R Accept<R>(IVisitor<R> visitor);
 
-	public struct Unary: IExpr
+	public struct Unary : IExpr
 	{
 		public Token @Operator { get; }
 		public IExpr Right { get; }
@@ -24,7 +24,8 @@ public interface IExpr
 
         public R Accept<R>(IVisitor<R> visitor) => visitor.VisitUnary(this);
     }
-	public struct Binary: IExpr
+	
+	public struct Binary : IExpr
 	{
 		public IExpr Left { get; }
 		public Token @Operator { get; }
@@ -38,7 +39,8 @@ public interface IExpr
 
 		public R Accept<R>(IVisitor<R> visitor) => visitor.VisitBinary(this);
 	}
-	public struct Grouping: IExpr
+	
+	public struct Grouping : IExpr
 	{
 		public IExpr Expr { get; }
 		public Grouping(IExpr Expr)
@@ -48,7 +50,8 @@ public interface IExpr
 
 		public R Accept<R>(IVisitor<R> visitor) => visitor.VisitGrouping(this);
 	}
-	public struct Literal: IExpr
+	
+	public struct Literal : IExpr
 	{
 		public Object? Value { get; }
 		public Literal(Object? Value)
