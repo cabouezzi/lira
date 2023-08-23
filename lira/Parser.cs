@@ -12,15 +12,18 @@ public class Parser
         this._tokens = tokens;
     }
 
-    public IExpr? Parse()
+    public List<IStatement> Parse()
     {
+        List<IStatement> statements = new();
         try
         {
-            return Expression();
+            while (!IsAtEOF) statements.Add(Statement());
+            return statements;
         }
-        catch (ParserError)
+        catch (ParserError e)
         {
-            return null; // TODO: Error handling
+            Lira.Error(-1, e.Message);
+            return statements;
         }
     }
 
@@ -31,6 +34,8 @@ public class Parser
     }
 
     private bool IsAtEOF => _current >= _tokens.Count;
+    
+    #region Helpers
 
     private Token Peek() => _tokens[_current];
     private Token Previous() => _tokens[_current - 1];
@@ -56,8 +61,36 @@ public class Parser
         }
         return false;
     }
+    
+    #endregion
 
-    private IExpr Expression () => Equality();
+    #region Statements
+    
+    private IStatement Statement()
+    {
+        if (Match(TokenKind.PRINT)) return PrintStatement();
+        else return ExpressionStatement();
+    }
+
+    private IStatement.Print PrintStatement()
+    {
+        IExpr val = Expression();
+        Consume(TokenKind.SEMICOLON, "Expected ';' after expression.");
+        return new(val);
+    }
+    
+    private IStatement.Expression ExpressionStatement()
+    {
+        IExpr val = Expression();
+        Consume(TokenKind.SEMICOLON, "Expected ';' after expression.");
+        return new(val);
+    }
+    
+    #endregion
+
+    #region Expressions
+    
+    private IExpr Expression() => Equality();
 
     private IExpr Equality()
     {
@@ -134,6 +167,8 @@ public class Parser
         }
         throw Error(Peek(), "Expected expression.");
     }
+    
+    #endregion
 
     /// <summary>
     /// Returns the parser to valid syntax upon encountering an error.

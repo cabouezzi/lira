@@ -10,7 +10,7 @@ public interface IExpr
 		T VisitLiteral(Literal literal);
 	}
 
-	public R Accept<R>(IVisitor<R> visitor);
+	public T Accept<T>(IVisitor<T> visitor);
 
 	public struct Unary : IExpr
 	{

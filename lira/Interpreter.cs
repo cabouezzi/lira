@@ -1,19 +1,20 @@
 namespace Lira;
 
-public class Interpreter : IExpr.IVisitor<object?>
+public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
 {
-    public void Interpret(IExpr expr)
+    public void Interpret(List<IStatement> statements)
     {
         try
         {
-            var val = Evaluate(expr);
-            Console.WriteLine(val);
+            foreach (IStatement statement in statements) Execute(statement);
         }
-        catch (Exception e)
+        catch (RuntimeError e)
         {
             Lira.Error(-1, e.Message);
         }
     }
+
+    private void Execute(IStatement statement) => statement.Accept(this);
 
     private object? Evaluate(IExpr expr) => expr.Accept(this);
 
@@ -28,9 +29,9 @@ public class Interpreter : IExpr.IVisitor<object?>
     {
         if (lhs is null && rhs is null) return true;
         if (lhs is null || rhs is null) return false;
-        
+
         // *Custom equality here
-        
+
         return lhs.Equals(rhs);
     }
 
@@ -104,4 +105,31 @@ public class Interpreter : IExpr.IVisitor<object?>
     public object? VisitLiteral(IExpr.Literal literal) => literal.Value;
 
     #endregion
+
+    public bool VisitExpression(IStatement.Expression expr)
+    {
+        try
+        {
+            Evaluate(expr.Expr);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    public bool VisitPrint(IStatement.Print print)
+    {
+        try
+        {
+            var val = Evaluate(print.Expr);
+            Console.WriteLine(val);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

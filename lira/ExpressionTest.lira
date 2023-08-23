@@ -2,4 +2,6 @@
 /*
 This should also be ignored
 */
-1+4*10 == 1845/45
+print "Testing print statements";
+print 101;
+print 1+4*10 == 1845/45;;
