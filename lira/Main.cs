@@ -2,7 +2,6 @@ namespace Lira;
 
 public class Lira
 {
-
     public static void Main(string[] args)
     {
         if (args.Length == 1)
@@ -12,11 +11,11 @@ public class Lira
         else
         {
             Console.WriteLine("""
-            Welcome to Lira habibi!
-            We charge 10% interest in performance for each line of text.
-            ------------------------------------------------------------
-            Usage: lira <file_name>
-            """);
+                              Welcome to Lira habibi!
+                              We charge 10% interest in performance for each line of text.
+                              ------------------------------------------------------------
+                              Usage: lira <file_name>
+                              """);
         }
     }
 
@@ -25,26 +24,24 @@ public class Lira
         string source = File.ReadAllText(path);
         Scanner scanner = new(source);
         List<Token> tokens = scanner.ScanTokens();
-        
+
         Console.WriteLine("Scanner returned following tokens:");
-        foreach(Token token in tokens) Console.Write($"{token} ");
+        foreach (Token token in tokens) Console.Write($"{token} ");
 
         Console.WriteLine("\n");
 
         Parser parser = new(tokens);
-        IExpr? expr = parser.Parse();
+        List<IStatement> statements = parser.Parse();
 
-        if (expr is null)
+        foreach (IStatement statement in statements)
         {
-            Console.Write("Parser returned null expression.");
-            return;
+            Console.WriteLine(new ASTPrinter().Print(statement.Expr));
         }
-        Console.WriteLine(new ASTPrinter().Print(expr));
-        
+
         Console.WriteLine("\n");
 
         Interpreter interpreter = new();
-        interpreter.Interpret(expr);
+        interpreter.Interpret(statements);
     }
 
     public static void Error(int line, string message)
@@ -56,5 +53,4 @@ public class Lira
     {
         Console.WriteLine($"[line {line}] Error {context}: {message}");
     }
-
 }
