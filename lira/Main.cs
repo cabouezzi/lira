@@ -40,6 +40,11 @@ public class Lira
             return;
         }
         Console.WriteLine(new ASTPrinter().Print(expr));
+        
+        Console.WriteLine("\n");
+
+        Interpreter interpreter = new();
+        interpreter.Interpret(expr);
     }
 
     public static void Error(int line, string message)
