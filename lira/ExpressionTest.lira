@@ -2,4 +2,4 @@
 /*
 This should also be ignored
 */
-((1 + 2) / (44.454 * 6 )) == -77 != "this should not throw an error" == nil
+1+4*10 == 1845/45
