@@ -2,7 +2,6 @@ namespace Lira;
 
 public class Interpreter : IExpr.IVisitor<object?>
 {
-
     public void Interpret(IExpr expr)
     {
         try
@@ -16,10 +15,7 @@ public class Interpreter : IExpr.IVisitor<object?>
         }
     }
 
-    private object? Evaluate(IExpr expr)
-    {
-        return expr.Accept(this);
-    }
+    private object? Evaluate(IExpr expr) => expr.Accept(this);
 
     private bool IsTruthy(object? obj)
     {
@@ -32,18 +28,20 @@ public class Interpreter : IExpr.IVisitor<object?>
     {
         if (lhs is null && rhs is null) return true;
         if (lhs is null || rhs is null) return false;
+        
         // *Custom equality here
+        
         return lhs.Equals(rhs);
     }
 
     private void CheckNumbers(Token token, params object?[] objs)
     {
-        if (objs.Any(obj => obj is not double)) 
+        if (objs.Any(obj => obj is not double))
             throw new RuntimeError(token, "Operand must be a number");
     }
 
     #region Visitor Interface
-    
+
     public object? VisitUnary(IExpr.Unary unary)
     {
         var right = Evaluate(unary.Right)!;
@@ -69,34 +67,34 @@ public class Interpreter : IExpr.IVisitor<object?>
             case TokenKind.MINUS:
                 CheckNumbers(binary.Operator, left, right);
                 return (double)left - (double)right;
-            case TokenKind.SLASH: 
+            case TokenKind.SLASH:
                 CheckNumbers(binary.Operator, left, right);
                 return (double)left / (double)right;
-            case TokenKind.STAR: 
+            case TokenKind.STAR:
                 CheckNumbers(binary.Operator, left, right);
                 return (double)left * (double)right;
-            
+
             case TokenKind.PLUS when left is double ld && right is double rd: return ld + rd;
             case TokenKind.PLUS when left is string ls && right is string rs: return ls + rs;
-            case TokenKind.PLUS: 
+            case TokenKind.PLUS:
                 throw new RuntimeError(binary.Operator, "Operator can only be used on numbers or strings.");
-            
-            case TokenKind.GREATER: 
+
+            case TokenKind.GREATER:
                 CheckNumbers(binary.Operator, left, right);
                 return (double)left > (double)right;
-            case TokenKind.GREATER_EQUAL: 
+            case TokenKind.GREATER_EQUAL:
                 CheckNumbers(binary.Operator, left, right);
                 return (double)left >= (double)right;
-            case TokenKind.LESS: 
+            case TokenKind.LESS:
                 CheckNumbers(binary.Operator, left, right);
                 return (double)left < (double)right;
-            case TokenKind.LESS_EQUAL: 
+            case TokenKind.LESS_EQUAL:
                 CheckNumbers(binary.Operator, left, right);
                 return (double)left <= (double)right;
-            
+
             case TokenKind.EQUAL_EQUAL: return IsEqual(left, right);
             case TokenKind.BANG_EQUAL: return !IsEqual(left, right);
-            
+
             default: return null;
         }
     }
@@ -104,6 +102,6 @@ public class Interpreter : IExpr.IVisitor<object?>
     public object? VisitGrouping(IExpr.Grouping grouping) => Evaluate(grouping.Expr);
 
     public object? VisitLiteral(IExpr.Literal literal) => literal.Value;
-    
+
     #endregion
 }
