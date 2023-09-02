@@ -4,9 +4,10 @@ public class Environment
 {
     private Dictionary<String, object?> _container = new();
 
-    public Environment? Enclosing { get;}
+    public Environment? Enclosing { get; }
 
-    public Environment(Environment? enclosing = null) {
+    public Environment(Environment? enclosing = null)
+    {
         this.Enclosing = enclosing;
     }
 
@@ -16,7 +17,7 @@ public class Environment
         if (_container.TryGetValue(id.Lexeme, out object? value)) return value;
 
         if (Enclosing is not null) return Enclosing.Get(id);
-        
+
         throw new RuntimeError(id, $"Undefined variable `{id.Lexeme}`.");
     }
 

@@ -5,7 +5,7 @@ namespace Lira;
 public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
 {
     private Environment Environment = new();
-    
+
     public void Interpret(List<IStatement> statements)
     {
         try
@@ -23,7 +23,7 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
     private void ExecuteBlock(List<IStatement> statements, Environment environment)
     {
         Environment prev = this.Environment;
-        try 
+        try
         {
             this.Environment = environment;
             foreach (IStatement statement in statements) Execute(statement);
