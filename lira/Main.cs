@@ -33,13 +33,6 @@ public class Lira
         Parser parser = new(tokens);
         List<IStatement> statements = parser.Parse();
 
-        foreach (IStatement statement in statements)
-        {
-            Console.WriteLine(new ASTPrinter().Print(statement.Expr));
-        }
-
-        Console.WriteLine("\n");
-
         Interpreter interpreter = new();
         interpreter.Interpret(statements);
     }

@@ -5,10 +5,7 @@ namespace Lira;
 public class ASTPrinter : IExpr.IVisitor<string>
 {
 
-    public string Print(IExpr expr)
-    {
-        return expr.Accept(this);
-    }
+    public string Print(IExpr expr) => expr.Accept(this);
 
     private String Parenthesize(String name, params IExpr[] exprs)
     {
@@ -30,7 +27,10 @@ public class ASTPrinter : IExpr.IVisitor<string>
     public string VisitGrouping(IExpr.Grouping grouping) => Parenthesize("group", grouping.Expr);
 
     public string VisitLiteral(IExpr.Literal literal) => literal.Value is null ? "nil" : $"{literal.Value}";
+    
+    public string VisitVariable(IExpr.Variable variable) => $"var {variable.Identifier.Lexeme}";
 
     public string VisitUnary(IExpr.Unary unary) => Parenthesize(unary.Operator.Lexeme, unary.Right);
-    
+
+    public string VisitAssignment(IExpr.Assignment assignment) => $"{assignment.Identifier.Lexeme} = {assignment.Value}";
 }

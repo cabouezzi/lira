@@ -1,20 +1,38 @@
+using System.Runtime.InteropServices;
+
 namespace Lira;
 
 public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
 {
+    private Environment Environment = new();
+    
     public void Interpret(List<IStatement> statements)
     {
         try
         {
             foreach (IStatement statement in statements) Execute(statement);
         }
-        catch (RuntimeError e)
+        catch (Exception e)
         {
             Lira.Error(-1, e.Message);
         }
     }
 
     private void Execute(IStatement statement) => statement.Accept(this);
+
+    private void ExecuteBlock(List<IStatement> statements, Environment environment)
+    {
+        Environment prev = this.Environment;
+        try 
+        {
+            this.Environment = environment;
+            foreach (IStatement statement in statements) Execute(statement);
+        }
+        finally
+        {
+            this.Environment = prev;
+        }
+    }
 
     private object? Evaluate(IExpr expr) => expr.Accept(this);
 
@@ -78,7 +96,7 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
             case TokenKind.PLUS when left is double ld && right is double rd: return ld + rd;
             case TokenKind.PLUS when left is string ls && right is string rs: return ls + rs;
             case TokenKind.PLUS:
-                throw new RuntimeError(binary.Operator, "Operator can only be used on numbers or strings.");
+                throw new RuntimeError(binary.Operator, "Operator can only be used on defined numbers or strings.");
 
             case TokenKind.GREATER:
                 CheckNumbers(binary.Operator, left, right);
@@ -104,32 +122,41 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
 
     public object? VisitLiteral(IExpr.Literal literal) => literal.Value;
 
+    public object? VisitVariable(IExpr.Variable variable) => Environment.Get(variable.Identifier);
+
+    public object? VisitAssignment(IExpr.Assignment assignment)
+    {
+        var val = Evaluate(assignment.Value);
+        Environment.Assign(assignment.Identifier, assignment.Value);
+        return val;
+    }
+
     #endregion
 
     public bool VisitExpression(IStatement.Expression expr)
     {
-        try
-        {
-            Evaluate(expr.Expr);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        Evaluate(expr.Expr);
+        return true;
     }
 
     public bool VisitPrint(IStatement.Print print)
     {
-        try
-        {
-            var val = Evaluate(print.Expr);
-            Console.WriteLine(val);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        var val = Evaluate(print.Expr);
+        if (val is null) val = "nil";
+        Console.WriteLine(val);
+        return true;
+    }
+
+    public bool VisitVariable(IStatement.Variable variable)
+    {
+        var val = Evaluate(variable.Expr);
+        Environment.Define(variable.Identifier.Lexeme, val);
+        return true;
+    }
+
+    public bool VisitBlock(IStatement.Block block)
+    {
+        ExecuteBlock(block.Statements, new Environment(this.Environment));
+        return true;
     }
 }
