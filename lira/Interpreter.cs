@@ -96,7 +96,7 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
             case TokenKind.PLUS when left is double ld && right is double rd: return ld + rd;
             case TokenKind.PLUS when left is string ls && right is string rs: return ls + rs;
             case TokenKind.PLUS:
-                throw new RuntimeError(binary.Operator, $"Operator can only be used on defined numbers or strings.");
+                throw new RuntimeError(binary.Operator, "Operator can only be used on defined numbers or strings.");
 
             case TokenKind.GREATER:
                 CheckNumbers(binary.Operator, left, right);
