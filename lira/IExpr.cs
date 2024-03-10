@@ -11,6 +11,7 @@ public interface IExpr
         T VisitVariable(Variable variable);
         T VisitAssignment(Assignment assignment);
         T VisitLogical(Logical logical);
+        T VisitFunctionCall(FunctionCall call);
     }
 
     public T Accept<T>(IVisitor<T> visitor);
@@ -52,7 +53,7 @@ public interface IExpr
             this.@Operator = @Operator;
             this.Right = Right;
         }
-        
+
         public R Accept<R>(IVisitor<R> visitor) => visitor.VisitLogical(this);
     }
 
@@ -84,6 +85,25 @@ public interface IExpr
         }
 
         public R Accept<R>(IVisitor<R> visitor) => visitor.VisitBinary(this);
+    }
+
+    public struct FunctionCall : IExpr
+    {
+        public IExpr Identifier { get; }
+        /// <summary>
+        /// Used for reporting runtime errors
+        /// </summary>
+        public Token ClosingParenthesis { get; }
+        public List<IExpr> Arguments { get; }
+
+        public FunctionCall(IExpr Identifier, Token ClosingParenthesis, List<IExpr> Arguments)
+        {
+            this.Identifier = Identifier;
+            this.ClosingParenthesis = ClosingParenthesis;
+            this.Arguments = Arguments;
+        }
+
+        public R Accept<R>(IVisitor<R> visitor) => visitor.VisitFunctionCall(this);
     }
 
     public struct Grouping : IExpr

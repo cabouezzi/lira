@@ -70,3 +70,11 @@ if (false or z) {
 } else {
     print "Control flow woohoo";
 }
+
+// Testing out function calls
+func sayHi(first, last) {
+    print "Calling from within a function:
+    Hello World, from " + first + " " + last + "!";
+}
+
+sayHi("John", "Doe");

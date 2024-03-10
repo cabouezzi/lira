@@ -37,9 +37,9 @@ public class Lira
         interpreter.Interpret(statements);
     }
 
-    public static void Error(int line, string message)
+    public static void Error(int line, string context, string message)
     {
-        Report(line, "", message);
+        Report(line, context, message);
     }
 
     public static void Report(int line, string context, string message)

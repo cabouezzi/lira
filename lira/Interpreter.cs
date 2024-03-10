@@ -4,6 +4,7 @@ namespace Lira;
 
 public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
 {
+    public readonly Environment Globals = new();
     private Environment Environment = new();
 
     public void Interpret(List<IStatement> statements)
@@ -14,13 +15,13 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
         }
         catch (Exception e)
         {
-            Lira.Error(-1, e.Message);
+            Lira.Error(-1, "Interpreting", e.Message);
         }
     }
 
     private void Execute(IStatement statement) => statement.Accept(this);
 
-    private void ExecuteBlock(List<IStatement> statements, Environment environment)
+    public void ExecuteBlock(List<IStatement> statements, Environment environment)
     {
         Environment prev = this.Environment;
         try
@@ -59,7 +60,7 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
             throw new RuntimeError(token, "Operand must be a number");
     }
 
-    #region Visitor Interface
+    #region Expression Visitor Interface
 
     public object? VisitUnary(IExpr.Unary unary)
     {
@@ -131,7 +132,43 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
         return val;
     }
 
+    public object? VisitLogical(IExpr.Logical logical)
+    {
+        object? left = Evaluate(logical.Left);
+        if (logical.Operator.Kind == TokenKind.OR)
+        {
+            if (IsTruthy(left)) return left;
+        }
+        else
+        {
+            if (!IsTruthy(left)) return left;
+        }
+        return Evaluate(logical.Right);
+    }
+
+    public object? VisitFunctionCall(IExpr.FunctionCall call)
+    {
+        object? identifier = Evaluate(call.Identifier);
+
+        List<object?> arguments = new();
+        foreach (IExpr expr in call.Arguments)
+        {
+            arguments.Add(Evaluate(expr));
+        }
+
+        // NOTE: The book also throws runtime errors when arguments length doesn't match function's arity.
+        // Instead, the Parser will throw an error.
+        if (identifier is not ILiraCallable function)
+        {
+            throw new RuntimeError(call.ClosingParenthesis, "Can only call functions and classes.");
+        }
+
+        return function.Call(this, arguments);
+    }
+
     #endregion
+
+    #region Statement Visitor Interface
 
     public bool VisitExpression(IStatement.Expression expr)
     {
@@ -173,20 +210,6 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
         return true;
     }
 
-    public object? VisitLogical(IExpr.Logical logical)
-    {
-        object? left = Evaluate(logical.Left);
-        if (logical.Operator.Kind == TokenKind.OR)
-        {
-            if (IsTruthy(left)) return left;
-        }
-        else
-        {
-            if (!IsTruthy(left)) return left;
-        }
-        return Evaluate(logical.Right);
-    }
-
     public bool VisitWhile(IStatement.While whileStatement)
     {
         while (IsTruthy(Evaluate(whileStatement.Condition)))
@@ -195,4 +218,13 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
         }
         return true;
     }
+
+    public bool VisitFunction(IStatement.Function function)
+    {
+        ILiraCallable.LiraFunction fn = new(function);
+        Environment.Define(function.Identifier.Lexeme, fn);
+        return true;
+    }
+
+    #endregion
 }
