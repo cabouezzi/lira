@@ -33,4 +33,6 @@ public class ASTPrinter : IExpr.IVisitor<string>
     public string VisitUnary(IExpr.Unary unary) => Parenthesize(unary.Operator.Lexeme, unary.Right);
 
     public string VisitAssignment(IExpr.Assignment assignment) => $"{assignment.Identifier.Lexeme} = {assignment.Value}";
+
+    public string VisitLogical(IExpr.Logical logical) => $"{logical.Left} {logical.Operator} {logical.Right}";
 }

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Numerics;
 using System.Security.Cryptography;
 
 namespace Lira;
@@ -94,9 +95,34 @@ public class Parser
 
     private IStatement Statement()
     {
+        if (Match(TokenKind.IF)) return IfStatement();
         if (Match(TokenKind.PRINT)) return PrintStatement();
+        if (Match(TokenKind.WHILE)) return WhileStatement();
         if (Match(TokenKind.LEFT_BRACE)) return new IStatement.Block(BlockStatement());
         else return ExpressionStatement();
+    }
+
+    private IStatement.While WhileStatement()
+    {
+        Consume(TokenKind.LEFT_PAREN, "Expected '(' after 'while'.");
+        IExpr condition = Expression();
+
+        Consume(TokenKind.RIGHT_PAREN, "Expected ')' after 'while' condition.");
+        IStatement body = Statement();
+
+        return new(condition, body);
+    }
+
+    private IStatement.If IfStatement()
+    {
+        Consume(TokenKind.LEFT_PAREN, "Expected '(' after 'if'.");
+        IExpr condition = Expression();
+        Consume(TokenKind.RIGHT_PAREN, "Expected ')' after 'if' condition.");
+
+        IStatement thenStatement = Statement();
+        IStatement? elseStatement = Match(TokenKind.ELSE) ? Statement() : null;
+
+        return new(condition, thenStatement, elseStatement);
     }
 
     private IStatement.Print PrintStatement()
@@ -135,18 +161,43 @@ public class Parser
 
     private IExpr Assignment()
     {
-        IExpr expr = Equality();
+        IExpr expr = Or();
 
         if (Match(TokenKind.EQUAL))
         {
             Token equals = Previous();
             IExpr value = Assignment();
 
-            if (expr is IExpr.Variable variable) return variable;
+            if (expr is IExpr.Variable variable)
+                return new IExpr.Assignment(variable.Identifier, value);
 
             Error(equals, "Invalid assignment");
         }
 
+        return expr;
+    }
+
+    private IExpr Or()
+    {
+        IExpr expr = And();
+        while (Match(TokenKind.OR))
+        {
+            Token @operator = Previous();
+            IExpr right = And();
+            expr = new IExpr.Logical(expr, @operator, right);
+        }
+        return expr;
+    }
+
+    private IExpr And()
+    {
+        IExpr expr = Equality();
+        while (Match(TokenKind.AND))
+        {
+            Token @operator = Previous();
+            IExpr right = Equality();
+            expr = new IExpr.Logical(expr, @operator, right);
+        }
         return expr;
     }
 

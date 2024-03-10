@@ -9,6 +9,8 @@ public interface IStatement
         T VisitPrint(Print print);
         T VisitVariable(Variable variable);
         T VisitBlock(Block block);
+        T VisitIf(If ifStatement);
+        T VisitWhile(While whileStatement);
     }
 
     public T Accept<T>(IVisitor<T> visitor);
@@ -36,6 +38,35 @@ public interface IStatement
         }
 
         public T Accept<T>(IVisitor<T> visitor) => visitor.VisitExpression(this);
+    }
+
+    public struct If : IStatement
+    {
+        public IExpr Condition { get; }
+        public IStatement ThenBranch { get; }
+        public IStatement? ElseBranch { get; }
+        public If(IExpr Condition, IStatement ThenBranch, IStatement? ElseBranch)
+        {
+            this.Condition = Condition;
+            this.ThenBranch = ThenBranch;
+            this.ElseBranch = ElseBranch;
+        }
+
+        public T Accept<T>(IVisitor<T> visitor) => visitor.VisitIf(this);
+    }
+
+
+    public struct While : IStatement
+    {
+        public IExpr Condition { get; }
+        public IStatement Body { get; }
+        public While(IExpr Condition, IStatement Body)
+        {
+            this.Condition = Condition;
+            this.Body = Body;
+        }
+
+        public T Accept<T>(IVisitor<T> visitor) => visitor.VisitWhile(this);
     }
 
     public struct Print : IStatement

@@ -1,0 +1,72 @@
+/*
+    This Lira script is for "testing" whenever something new is implemented.
+    This block comment is actually a test itself...
+*/
+
+// Testing declarations
+var a = "global" + " a";
+var b = "global" + " b";
+var c = "global" + " c";
+
+
+// Testing scopes
+{
+  var a = "outer a";
+  var b = "outer b";
+  {
+    var a = "inner a";
+    print a;
+    print b;
+    print c;
+  }
+  print a;
+  print b;
+  print c;
+}
+print a;
+print b;
+print c;
+
+var a = 10;
+{
+  var a = a + 2;
+  print a;
+}
+
+// Testing control gate outputs in these scenarios
+print "print this one" or -1; 
+print nil or "print this two";
+
+// Testing while loop
+print "Now testing while loop, count to 10";
+var i = 1;
+while (i <= 10) {
+    print i;
+    i = i + 1;
+}
+
+// Testing 'and' gate
+var x = true;
+var y = true;
+var z = false;
+if (x and y) {
+    print "x and y passed";
+} else {
+    print "ERROR: x and y did not pass";
+}
+
+if (x and z) {
+    print "ERROR: x and z should not pass";
+} else {
+    print "x and z failed, else statement reached";
+}
+
+if (y or z) {
+     print "y or z should pass";
+}
+
+if (false or z) {
+     print "ERROR: false or z should fail";
+} else {
+    print "Control flow woohoo";
+}

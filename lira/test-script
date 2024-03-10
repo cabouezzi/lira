@@ -1,4 +1,4 @@
 #!/bin/bash
 dotnet build --output .lirabuild
 # ./.lirabuild/Lira <–– path to executable
-./.lirabuild/Lira ExpressionTest.lira
+./.lirabuild/Lira SampleScript.lira

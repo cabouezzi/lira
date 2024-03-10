@@ -112,7 +112,7 @@ public partial class Scanner
         while (IsAlphaNumeric(Peek())) Advance();
         String text = _source.Substring(_start, _current - _start);
         TokenKind kind = _keywords.TryGetValue(text, out TokenKind value) ? _keywords[text] : TokenKind.IDENTIFIER;
-        AddToken((TokenKind)kind);
+        AddToken(kind);
     }
 
     private bool IsAlpha(char c)
