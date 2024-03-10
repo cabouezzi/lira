@@ -1,8 +1,13 @@
+using System.Linq.Expressions;
+using System.Security.Cryptography;
+
 namespace Lira;
 
 public class Parser
 {
-    public class ParserError : Exception {}
+    public class ParserError : Exception
+    {
+    }
 
     private readonly List<Token> _tokens;
     private int _current = 0;
@@ -12,25 +17,25 @@ public class Parser
         this._tokens = tokens;
     }
 
-    public IExpr? Parse()
+    public List<IStatement> Parse()
     {
+        List<IStatement> statements = new();
         try
         {
-            return Expression();
+            while (!IsAtEOF) statements.Add(Declaration());
+            return statements;
         }
-        catch (ParserError)
+        catch (ParserError e)
         {
-            return null; // TODO: Error handling
+            Lira.Error(-1, e.Message);
+            return statements;
         }
     }
 
-    private ParserError Error(Token token, string message)
-    {
-        Lira.Error(token.Line, message);
-        return new();
-    }
+    #region Helpers
 
     private bool IsAtEOF => _current >= _tokens.Count;
+
 
     private Token Peek() => _tokens[_current];
     private Token Previous() => _tokens[_current - 1];
@@ -54,10 +59,96 @@ public class Parser
                 return true;
             }
         }
+
         return false;
     }
 
-    private IExpr Expression () => Equality();
+    #endregion
+
+    #region Statements
+
+    private IStatement? Declaration()
+    {
+        try
+        {
+            if (Match(TokenKind.VAR)) return VarStatement();
+            return Statement();
+        }
+        catch (ParserError e)
+        {
+            Synchronize();
+            return null;
+        }
+    }
+
+    private IStatement VarStatement()
+    {
+        Token id = Consume(TokenKind.IDENTIFIER, "Expected variable name.");
+        IExpr init;
+        if (Match(TokenKind.EQUAL)) init = Expression();
+        else init = new IExpr.Literal(null);
+
+        Consume(TokenKind.SEMICOLON, "Expected ';' after variable declaration.");
+        return new IStatement.Variable(id, init);
+    }
+
+    private IStatement Statement()
+    {
+        if (Match(TokenKind.PRINT)) return PrintStatement();
+        if (Match(TokenKind.LEFT_BRACE)) return new IStatement.Block(BlockStatement());
+        else return ExpressionStatement();
+    }
+
+    private IStatement.Print PrintStatement()
+    {
+        IExpr val = Expression();
+        Consume(TokenKind.SEMICOLON, "Expected ';' after expression.");
+        return new(val);
+    }
+
+    private IStatement.Expression ExpressionStatement()
+    {
+        IExpr val = Expression();
+        Consume(TokenKind.SEMICOLON, "Expected ';' after expression.");
+        return new(val);
+    }
+
+    private List<IStatement> BlockStatement()
+    {
+        List<IStatement> block = new();
+
+        while (!Check(TokenKind.RIGHT_BRACE) && !IsAtEOF)
+        {
+            IStatement? statement = Declaration();
+            if (statement is not null) block.Add(statement);
+        }
+
+        Consume(TokenKind.RIGHT_BRACE, "Expected `}` closing block.");
+        return block;
+    }
+
+    #endregion
+
+    #region Expressions
+
+    private IExpr Expression() => Assignment();
+
+    private IExpr Assignment()
+    {
+        IExpr expr = Equality();
+
+        if (Match(TokenKind.EQUAL))
+        {
+            Token equals = Previous();
+            IExpr value = Assignment();
+
+            if (expr is IExpr.Variable variable) return variable;
+
+            Error(equals, "Invalid assignment");
+        }
+
+        return expr;
+    }
 
     private IExpr Equality()
     {
@@ -68,6 +159,7 @@ public class Parser
             IExpr right = Comparison();
             expr = new IExpr.Binary(expr, @operator, right);
         }
+
         return expr;
     }
 
@@ -80,6 +172,7 @@ public class Parser
             IExpr right = Term();
             expr = new IExpr.Binary(expr, @operator, right);
         }
+
         return expr;
     }
 
@@ -92,6 +185,7 @@ public class Parser
             IExpr right = Factor();
             expr = new IExpr.Binary(expr, @operator, right);
         }
+
         return expr;
     }
 
@@ -104,6 +198,7 @@ public class Parser
             IExpr right = Unary();
             expr = new IExpr.Binary(expr, @operator, right);
         }
+
         return expr;
     }
 
@@ -115,6 +210,7 @@ public class Parser
             IExpr right = Unary();
             return new IExpr.Unary(@operator, right);
         }
+
         return Primary();
     }
 
@@ -132,7 +228,18 @@ public class Parser
             Consume(TokenKind.RIGHT_PAREN, "Expect ')' after expression.");
             return new IExpr.Grouping(expr);
         }
+
+        if (Match(TokenKind.IDENTIFIER)) return new IExpr.Variable(Previous());
+
         throw Error(Peek(), "Expected expression.");
+    }
+
+    #endregion
+
+    private ParserError Error(Token token, string message)
+    {
+        Lira.Error(token.Line, message);
+        return new();
     }
 
     /// <summary>

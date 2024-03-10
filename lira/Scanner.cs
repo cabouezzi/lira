@@ -107,7 +107,7 @@ public partial class Scanner
     }
 
     // Identifiers
-    private void ReadIdentifier ()
+    private void ReadIdentifier()
     {
         while (IsAlphaNumeric(Peek())) Advance();
         String text = _source.Substring(_start, _current - _start);
@@ -115,18 +115,18 @@ public partial class Scanner
         AddToken((TokenKind)kind);
     }
 
-    private bool IsAlpha (char c)
+    private bool IsAlpha(char c)
     {
         // Acceptable initial character for a variable name
-        return  (c >= 'a' && c <= 'z') ||
+        return (c >= 'a' && c <= 'z') ||
                 (c >= 'A' && c <= 'Z') ||
                 (c == '_');
     }
-    
-    private bool IsAlphaNumeric (char c) => IsAlpha(c) || IsDigit(c);
+
+    private bool IsAlphaNumeric(char c) => IsAlpha(c) || IsDigit(c);
 
     // Strings 
-    private void ReadString ()
+    private void ReadString()
     {
         while (Peek() != '"' && !IsAtEOF)
         {
@@ -146,7 +146,7 @@ public partial class Scanner
     }
 
     // Numbers (Float)
-    private void ReadNumber ()
+    private void ReadNumber()
     {
         while (IsDigit(Peek())) Advance();
         // Decimals
@@ -159,14 +159,14 @@ public partial class Scanner
         AddToken(TokenKind.NUMBER, value);
     }
 
-    private bool IsDigit (char c) => c >= '0' && c <= '9';
+    private bool IsDigit(char c) => c >= '0' && c <= '9';
 
     #region Character Navigation
 
     private char Advance() => _source[_current++];
     private char Peek() => (IsAtEOF) ? '\0' : _source[_current];
     private char PeekNext() => (_current + 1 >= _source.Length) ? '\0' : _source[_current + 1];
-    private bool Match (char exp)
+    private bool Match(char exp)
     {
         if (IsAtEOF) return false;
         if (_source[_current] != exp) return false;

@@ -1,5 +1,5 @@
 ﻿namespace Lira;
-	
+
 public sealed class Token
 {
 	public TokenKind Kind { get; }
