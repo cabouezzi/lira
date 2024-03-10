@@ -4,8 +4,16 @@ namespace Lira;
 
 public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
 {
+    /// <summary>
+    /// Use this environment to define native functions and variables.
+    /// </summary>
     public readonly Environment Globals = new();
-    private Environment Environment = new();
+    private Environment Environment;
+
+    public Interpreter()
+    {
+        this.Environment = Globals;
+    }
 
     public void Interpret(List<IStatement> statements)
     {
