@@ -54,7 +54,11 @@ public partial class Scanner
                 // Skip block comments
                 else if (Match('*'))
                 {
-                    while (!(Peek() == '*' && PeekNext() == '/') && !IsAtEOF) Advance();
+                    while (!(Peek() == '*' && PeekNext() == '/') && !IsAtEOF) 
+                    {
+                        if (Peek() == '\n') _line++;
+                        Advance();
+                    }
                     // Consume '*/'
                     Advance();
                     Advance();
