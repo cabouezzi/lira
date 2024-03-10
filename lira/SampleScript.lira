@@ -29,3 +29,14 @@ var a = 10;
   var a = a + 2;
   print a;
 }
+
+print "print this one" or -1; 
+print nil or "print this two";
+
+print "Now testing while loop, count to 10";
+
+var i = 1;
+while (i <= 10) {
+    print i;
+    i = i + 1;
+}

@@ -96,7 +96,7 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
             case TokenKind.PLUS when left is double ld && right is double rd: return ld + rd;
             case TokenKind.PLUS when left is string ls && right is string rs: return ls + rs;
             case TokenKind.PLUS:
-                throw new RuntimeError(binary.Operator, "Operator can only be used on defined numbers or strings.");
+                throw new RuntimeError(binary.Operator, $"Operator can only be used on defined numbers or strings.");
 
             case TokenKind.GREATER:
                 CheckNumbers(binary.Operator, left, right);
@@ -127,7 +127,7 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
     public object? VisitAssignment(IExpr.Assignment assignment)
     {
         var val = Evaluate(assignment.Value);
-        Environment.Assign(assignment.Identifier, assignment.Value);
+        Environment.Assign(assignment.Identifier, val);
         return val;
     }
 
@@ -157,6 +157,42 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
     public bool VisitBlock(IStatement.Block block)
     {
         ExecuteBlock(block.Statements, new Environment(this.Environment));
+        return true;
+    }
+
+    public bool VisitIf(IStatement.If ifStatement)
+    {
+        if (IsTruthy(Evaluate(ifStatement.Condition)))
+        {
+            Execute(ifStatement.ThenBranch);
+        }
+        else if (ifStatement.ElseBranch is not null)
+        {
+            Execute(ifStatement.ElseBranch);
+        }
+        return true;
+    }
+
+    public object? VisitLogical(IExpr.Logical logical)
+    {
+        object? left = Evaluate(logical.Left);
+        if (logical.Operator.Kind == TokenKind.OR)
+        {
+            if (IsTruthy(left)) return left;
+        }
+        else
+        {
+            if (!IsTruthy(left)) return left;
+        }
+        return Evaluate(logical.Right);
+    }
+
+    public bool VisitWhile(IStatement.While whileStatement)
+    {
+        while (IsTruthy(Evaluate(whileStatement.Condition)))
+        {
+            Execute(whileStatement.Body);
+        }
         return true;
     }
 }

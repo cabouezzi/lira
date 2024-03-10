@@ -10,6 +10,7 @@ public interface IExpr
         T VisitLiteral(Literal literal);
         T VisitVariable(Variable variable);
         T VisitAssignment(Assignment assignment);
+        T VisitLogical(Logical logical);
     }
 
     public T Accept<T>(IVisitor<T> visitor);
@@ -38,6 +39,21 @@ public interface IExpr
         }
 
         public T Accept<T>(IVisitor<T> visitor) => visitor.VisitAssignment(this);
+    }
+
+    public struct Logical : IExpr
+    {
+        public IExpr Left { get; }
+        public Token @Operator { get; }
+        public IExpr Right { get; }
+        public Logical(IExpr Left, Token Operator, IExpr Right)
+        {
+            this.Left = Left;
+            this.@Operator = @Operator;
+            this.Right = Right;
+        }
+        
+        public R Accept<R>(IVisitor<R> visitor) => visitor.VisitLogical(this);
     }
 
     public struct Unary : IExpr
