@@ -11,6 +11,8 @@ public interface IStatement
         T VisitBlock(Block block);
         T VisitIf(If ifStatement);
         T VisitWhile(While whileStatement);
+        T VisitFunction(Function function);
+        T VisitReturn(Return returnStatement);
     }
 
     public T Accept<T>(IVisitor<T> visitor);
@@ -27,6 +29,34 @@ public interface IStatement
         }
 
         public T Accept<T>(IVisitor<T> visitor) => visitor.VisitVariable(this);
+    }
+
+    public struct Function : IStatement
+    {
+        public Token Identifier { get; }
+        public List<Token> Parameters { get; }
+        public List<IStatement> Body { get; }
+        public Function(Token Identifier, List<Token> Parameters, List<IStatement> Body)
+        {
+            this.Identifier = Identifier;
+            this.Parameters = Parameters;
+            this.Body = Body;
+        }
+
+        public T Accept<T>(IVisitor<T> visitor) => visitor.VisitFunction(this);
+    }
+
+    public struct Return : IStatement
+    {
+        public Token Keyword { get; }
+        public IExpr? Value { get; }
+        public Return(Token Keyword, IExpr? Value)
+        {
+            this.Keyword = Keyword;
+            this.Value = Value;
+        }
+
+        public T Accept<T>(IVisitor<T> visitor) => visitor.VisitReturn(this);
     }
 
     public struct Expression : IStatement

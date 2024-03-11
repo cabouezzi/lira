@@ -28,7 +28,7 @@ public class Parser
         }
         catch (ParserError e)
         {
-            Lira.Error(-1, e.Message);
+            Lira.Error(-1, "Parsing", e.Message);
             return statements;
         }
     }
@@ -72,6 +72,7 @@ public class Parser
     {
         try
         {
+            if (Match(TokenKind.FUNC)) return Function("function");
             if (Match(TokenKind.VAR)) return VarStatement();
             return Statement();
         }
@@ -80,6 +81,27 @@ public class Parser
             Synchronize();
             return null;
         }
+    }
+
+    private IStatement.Function Function(String kind)
+    {
+        Token id = Consume(TokenKind.IDENTIFIER, $"Expected {kind} name.");
+
+        Consume(TokenKind.LEFT_PAREN, $"Expected '(' after {kind} name.");
+        List<Token> parameters = new();
+
+        if (!Check(TokenKind.RIGHT_PAREN))
+        {
+            do
+            {
+                parameters.Add(Consume(TokenKind.IDENTIFIER, "Expected parameter name."));
+            } while (Match(TokenKind.COMMA));
+        }
+        Consume(TokenKind.RIGHT_PAREN, $"Expected ')' after {kind} parameters.");
+
+        Consume(TokenKind.LEFT_BRACE, "Expected '{' to begin function body.");
+        List<IStatement> block = BlockStatement();
+        return new(id, parameters, block);
     }
 
     private IStatement VarStatement()
@@ -97,9 +119,22 @@ public class Parser
     {
         if (Match(TokenKind.IF)) return IfStatement();
         if (Match(TokenKind.PRINT)) return PrintStatement();
+        if (Match(TokenKind.RETURN)) return ReturnStatement();
         if (Match(TokenKind.WHILE)) return WhileStatement();
         if (Match(TokenKind.LEFT_BRACE)) return new IStatement.Block(BlockStatement());
         else return ExpressionStatement();
+    }
+
+    private IStatement.Return ReturnStatement()
+    {
+        Token keyword = Previous();
+        IExpr? val = null;
+        if (!Check(TokenKind.SEMICOLON))
+        {
+            val = Expression();
+        }
+        Consume(TokenKind.SEMICOLON, "Expected ';' following return statement.");
+        return new(keyword, val);
     }
 
     private IStatement.While WhileStatement()
@@ -171,7 +206,7 @@ public class Parser
             if (expr is IExpr.Variable variable)
                 return new IExpr.Assignment(variable.Identifier, value);
 
-            Error(equals, "Invalid assignment");
+            throw Error(equals, "Invalid assignment");
         }
 
         return expr;
@@ -253,6 +288,49 @@ public class Parser
         return expr;
     }
 
+    private IExpr FunctionCall()
+    {
+        IExpr expr = Primary();
+
+        while (true)
+        {
+            if (Match(TokenKind.LEFT_PAREN))
+            {
+                expr = FinishFunctionCall(expr);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return expr;
+    }
+
+    private IExpr.FunctionCall FinishFunctionCall(IExpr identifier)
+    {
+        List<IExpr> arguments = new();
+        if (!Check(TokenKind.RIGHT_PAREN))
+        {
+            do
+            {
+                arguments.Add(Expression());
+            } while (Match(TokenKind.COMMA));
+        }
+
+        Token closingParen = Consume(TokenKind.RIGHT_PAREN, "Expected ')' after arguments in function call.");
+
+        if (identifier is ILiraCallable function)
+        {
+            if (arguments.Count != function.Arity)
+            {
+                throw Error(closingParen, $"Expected {function.Arity} arguments, but received {arguments.Count}.");
+            }
+        }
+
+        return new(identifier, closingParen, arguments);
+    }
+
     private IExpr Unary()
     {
         if (Match(TokenKind.BANG, TokenKind.MINUS))
@@ -262,7 +340,7 @@ public class Parser
             return new IExpr.Unary(@operator, right);
         }
 
-        return Primary();
+        return FunctionCall();
     }
 
     private IExpr Primary()
@@ -289,7 +367,7 @@ public class Parser
 
     private ParserError Error(Token token, string message)
     {
-        Lira.Error(token.Line, message);
+        Lira.Error(token.Line, "Parsing", message);
         return new();
     }
 

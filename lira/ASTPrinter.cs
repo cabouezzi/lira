@@ -35,4 +35,6 @@ public class ASTPrinter : IExpr.IVisitor<string>
     public string VisitAssignment(IExpr.Assignment assignment) => $"{assignment.Identifier.Lexeme} = {assignment.Value}";
 
     public string VisitLogical(IExpr.Logical logical) => $"{logical.Left} {logical.Operator} {logical.Right}";
+
+    public string VisitFunctionCall(IExpr.FunctionCall call) => $"{call.Identifier}({call.Arguments})";
 }
