@@ -229,9 +229,19 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
 
     public bool VisitFunction(IStatement.Function function)
     {
-        ILiraCallable.LiraFunction fn = new(function);
+        ILiraCallable.LiraFunction fn = new(function, Environment);
         Environment.Define(function.Identifier.Lexeme, fn);
         return true;
+    }
+
+    public bool VisitReturn(IStatement.Return returnStatement)
+    {
+        object? returned = null;
+        if (returnStatement.Value is not null)
+        {
+            returned = Evaluate(returnStatement.Value);
+        }
+        throw new Return(returned);
     }
 
     #endregion

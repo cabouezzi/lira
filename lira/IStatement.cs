@@ -12,6 +12,7 @@ public interface IStatement
         T VisitIf(If ifStatement);
         T VisitWhile(While whileStatement);
         T VisitFunction(Function function);
+        T VisitReturn(Return returnStatement);
     }
 
     public T Accept<T>(IVisitor<T> visitor);
@@ -43,6 +44,19 @@ public interface IStatement
         }
 
         public T Accept<T>(IVisitor<T> visitor) => visitor.VisitFunction(this);
+    }
+
+    public struct Return : IStatement
+    {
+        public Token Keyword { get; }
+        public IExpr? Value { get; }
+        public Return(Token Keyword, IExpr? Value)
+        {
+            this.Keyword = Keyword;
+            this.Value = Value;
+        }
+
+        public T Accept<T>(IVisitor<T> visitor) => visitor.VisitReturn(this);
     }
 
     public struct Expression : IStatement

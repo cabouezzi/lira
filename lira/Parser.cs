@@ -119,9 +119,22 @@ public class Parser
     {
         if (Match(TokenKind.IF)) return IfStatement();
         if (Match(TokenKind.PRINT)) return PrintStatement();
+        if (Match(TokenKind.RETURN)) return ReturnStatement();
         if (Match(TokenKind.WHILE)) return WhileStatement();
         if (Match(TokenKind.LEFT_BRACE)) return new IStatement.Block(BlockStatement());
         else return ExpressionStatement();
+    }
+
+    private IStatement.Return ReturnStatement()
+    {
+        Token keyword = Previous();
+        IExpr? val = null;
+        if (!Check(TokenKind.SEMICOLON))
+        {
+            val = Expression();
+        }
+        Consume(TokenKind.SEMICOLON, "Expected ';' following return statement.");
+        return new(keyword, val);
     }
 
     private IStatement.While WhileStatement()
