@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace Lira;
 
@@ -9,6 +10,8 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
     /// </summary>
     public readonly Environment Globals = new();
     private Environment Environment;
+    private readonly Dictionary<IExpr, int> locals = new();
+
 
     public Interpreter()
     {
@@ -24,6 +27,23 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
         catch (Exception e)
         {
             Lira.Error(-1, "Interpreting", e.Message);
+        }
+    }
+
+    public void Resolve(IExpr expr, int depth)
+    {
+        locals.Add(expr, depth);
+    }
+
+    public object? LookUpVariable(Token identifier, IExpr expr)
+    {
+        if (locals.TryGetValue(expr, out int distance))
+        {
+            return Environment.GetAt(distance, identifier.Lexeme);
+        }
+        else
+        {
+            return Globals.Get(identifier);
         }
     }
 
@@ -131,12 +151,20 @@ public class Interpreter : IExpr.IVisitor<object?>, IStatement.IVisitor<bool>
 
     public object? VisitLiteral(IExpr.Literal literal) => literal.Value;
 
-    public object? VisitVariable(IExpr.Variable variable) => Environment.Get(variable.Identifier);
+    public object? VisitVariable(IExpr.Variable variable) => LookUpVariable(variable.Identifier, variable);
 
     public object? VisitAssignment(IExpr.Assignment assignment)
     {
-        var val = Evaluate(assignment.Value);
-        Environment.Assign(assignment.Identifier, val);
+        object? val = Evaluate(assignment.Value);
+
+        if (locals.TryGetValue(assignment, out int distance))
+        {
+            Environment.AssignAt(distance, assignment.Identifier, val);
+        }
+        else
+        {
+            Globals.Assign(assignment.Identifier, val);
+        }
         return val;
     }
 

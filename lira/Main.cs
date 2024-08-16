@@ -31,9 +31,12 @@ public class Lira
         Console.WriteLine("\n");
 
         Parser parser = new(tokens);
+        Interpreter interpreter = new();
+        Resolver resolver = new(interpreter);
+
         List<IStatement> statements = parser.Parse();
 
-        Interpreter interpreter = new();
+        resolver.Resolve(statements);
         interpreter.Interpret(statements);
     }
 
